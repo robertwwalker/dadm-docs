@@ -1,0 +1,64 @@
+---
+title: "Week 3 Data"
+author: "RWW"
+format: 
+   html:
+     code-fold: true
+---
+
+## Load the Data
+
+```{r}
+load(url("https://github.com/robertwwalker/DADMStuff/raw/master/Week3Data.RData"))
+```
+
+## View the Data
+
+The magic of datatable and the `DT` library's `datatable` command.
+
+```{r}
+library(DT)
+```
+
+### Disability Expenditures
+
+#### Without NoExcel
+
+```{r}
+datatable(DisabilityExp)
+```
+
+#### NoExcel
+
+```{r}
+library(DT)
+datatable(DisabilityExp.NoExcel)
+```
+
+
+## UCB Admissions
+
+```{r}
+library(DT)
+UCBAdmit$Dept <- as.factor(UCBAdmit$Dept) 
+datatable(UCBAdmit)
+```
+
+## Bonds
+
+```{r}
+datatable(Bonds)
+```
+
+## FastFood
+
+```{r}
+datatable(FastFood)
+```
+
+## CEO Compensation
+
+```{r}
+datatable(CEOComp)
+```
+
