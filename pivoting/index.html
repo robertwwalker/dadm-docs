@@ -244,7 +244,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 6  Yes Below average   12</code></pre>
 </div>
 </div>
-<p>This is <strong>tidy</strong> though the names are bad but that can be fixed. Let me store this <strong>long</strong> table as an object to manipulate and fix the names. <strong>Long</strong> and <strong>tidy</strong> are interchangeable in the way that I use the terms. The correspond to</p>
+<p>This is <strong>tidy</strong> though the names are bad but that can be fixed. Let me store this <strong>long</strong> table as an object to manipulate and fix the names. <strong>Long</strong> and <strong>tidy</strong> are interchangeable in the way that I use the terms. Without further ado, here is the example.</p>
 <div class="cell" data-hash="index_cache/html/unnamed-chunk-4_cca4a9b28750ad082ff1d78e8a0bc85b">
 <details>
 <summary>Code</summary>
@@ -263,9 +263,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 6  Yes Below average    12</code></pre>
 </div>
 </div>
+<p>Why is this tidy? It contains three variables: <strong>Risk</strong>, <strong>Fees</strong>, and a <strong>Count</strong> of the number of Bond Funds for each pair of <strong>Risk</strong> and <strong>Fees</strong>.</p>
 <section id="pivoting-from-long-to-wide" class="level2">
 <h2 class="anchored" data-anchor-id="pivoting-from-long-to-wide">Pivoting from Long to Wide</h2>
-<p>For display and because it is the most common way of seeing a table, I want to pivot it to wide form. Basically, I want to create a 2 by 3 table with the values of Fees on the rows and the values of Risk on the Columns and each cell representing the number of Funds for that row-column pair. <em>I should note it will actually be two-by-four because Fees is a margin of the table but the labels are treated as a variable.</em> I will need to start with the <code>Bonds.Table.Long</code> above and create named columns from the categories of <strong>Risk</strong> with values drawn from the counts of the number of funds with that combination of characteristics. The two key arguments in this case are where do the names come from <code>names_from</code> which is <strong>Risk</strong> and where do the values come from <code>values_from</code> which will be <strong>Count</strong>.</p>
+<p>For display and because it is the most common way of seeing a table, I want to pivot it to wide form. Basically, I want to create a 2 (<strong>Fees</strong>) by 3 (<strong>Risk</strong>) table with the values of <strong>Fees</strong> on the rows and the values of <strong>Risk</strong> on the Columns and each cell representing the number of Funds for that row-column pair. <em>I should note it will actually be two-by-four because Fees is a margin of the table but the labels are treated as a variable.</em> I will need to start with the <code>Bonds.Table.Long</code> above and create named columns from the categories of <strong>Risk</strong> with values drawn from the counts of the number of funds with that combination of characteristics. The two key arguments in this case are where do the names come from <code>names_from</code> which is <strong>Risk</strong> and where do the values come from <code>values_from</code> which will be <strong>Count</strong>.</p>
 <div class="cell" data-hash="index_cache/html/unnamed-chunk-5_c1e340e88f7084b4d2dc3995b6aced6b">
 <details>
 <summary>Code</summary>
@@ -281,7 +282,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 2 Yes                22      20              12</code></pre>
 </div>
 </div>
-<p>Wide data has “data” in the column names and the tidyverse and tidy data analysis are built upon the idea that we have <em>units</em> and <em>variables</em>, this has information on the <em>units</em> in the column names. Another way of putting it is that the values of <strong>Risk</strong> are spread across multiple columns of <u>values</u>. A proper <em>unit</em> here would be a Fee-Risk pair [now that we have tabulated the data and left the raw data behind].</p>
+<p>Wide data has “data” in the column names and the tidyverse and tidy data analysis are built upon the idea that we have <em>units</em> and <em>variables</em>, this has information on the <em>units</em> in the column names. Another way of putting it is that the values of <strong>Risk</strong> are spread across multiple columns of <u>values</u>. A proper <em>unit</em> here would be a Fee-Risk pair [now that we have tabulated the data and left the raw data behind]. But that information is spread across rows and columns.</p>
 </section>
 <section id="pivoting-from-wide-to-long" class="level2">
 <h2 class="anchored" data-anchor-id="pivoting-from-wide-to-long">Pivoting from Wide to Long</h2>

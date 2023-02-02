@@ -56,7 +56,7 @@ Let me create a table to work with as a very small and manageable example to ill
 table(Bonds$Fees, Bonds$Risk) %>% data.frame()
 ```
 
-This is **tidy** though the names are bad but that can be fixed.  Let me store this __long__ table as an object to manipulate and fix the names.  __Long__ and **tidy** are interchangeable in the way that I use the terms.  The correspond to 
+This is **tidy** though the names are bad but that can be fixed.  Let me store this __long__ table as an object to manipulate and fix the names.  __Long__ and **tidy** are interchangeable in the way that I use the terms.  Without further ado, here is the example. 
 
 ```{r}
 Bonds.Table.Long <- table(Bonds$Fees, Bonds$Risk) %>%
@@ -65,9 +65,11 @@ Bonds.Table.Long <- table(Bonds$Fees, Bonds$Risk) %>%
 Bonds.Table.Long
 ```
 
+Why is this tidy?  It contains three variables: **Risk**, **Fees**, and a **Count** of the number of Bond Funds for each pair of **Risk** and **Fees**.
+
 ## Pivoting from Long to Wide
 
-For display and because it is the most common way of seeing a table, I want to pivot it to wide form.  Basically, I want to create a 2 by 3 table with the values of Fees on the rows and the values of Risk on the Columns and each cell representing the number of Funds for that row-column pair.  *I should note it will actually be two-by-four because Fees is a margin of the table but the labels are treated as a variable.*  I will need to start with the `Bonds.Table.Long` above and create named columns from the categories of **Risk** with values drawn from the counts of the number of funds with that combination of characteristics.  The two key arguments in this case are where do the names come from `names_from` which is **Risk** and where do the values come from `values_from` which will be **Count**.
+For display and because it is the most common way of seeing a table, I want to pivot it to wide form.  Basically, I want to create a 2 (**Fees**) by 3 (**Risk**) table with the values of **Fees** on the rows and the values of **Risk** on the Columns and each cell representing the number of Funds for that row-column pair.  *I should note it will actually be two-by-four because Fees is a margin of the table but the labels are treated as a variable.*  I will need to start with the `Bonds.Table.Long` above and create named columns from the categories of **Risk** with values drawn from the counts of the number of funds with that combination of characteristics.  The two key arguments in this case are where do the names come from `names_from` which is **Risk** and where do the values come from `values_from` which will be **Count**.
 
 ```{r}
 Bonds.Table.Wide <- Bonds.Table.Long %>% 
@@ -75,7 +77,7 @@ Bonds.Table.Wide <- Bonds.Table.Long %>%
 Bonds.Table.Wide
 ```
 
-Wide data has "data" in the column names and the tidyverse and tidy data analysis are built upon the idea that we have *units* and *variables*, this has information on the *units* in the column names.  Another way of putting it is that the values of **Risk** are spread across multiple columns of <u>values</u>.  A proper *unit* here would be a Fee-Risk pair [now that we have tabulated the data and left the raw data behind].
+Wide data has "data" in the column names and the tidyverse and tidy data analysis are built upon the idea that we have *units* and *variables*, this has information on the *units* in the column names.  Another way of putting it is that the values of **Risk** are spread across multiple columns of <u>values</u>.  A proper *unit* here would be a Fee-Risk pair [now that we have tabulated the data and left the raw data behind].  But that information is spread across rows and columns.
 
 ## Pivoting from Wide to Long
 
