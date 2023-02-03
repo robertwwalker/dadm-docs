@@ -26,7 +26,9 @@ library(hrbrthemes)
 theme_set(theme_ipsum())
 ```
 
-# tidyTuesday Economist Data
+The task is easiest accomplish by creating and plotting a table.  In the event that we do not have the table, we will have to create counts.  I will first show the table.  The same technique with the addition of the count appears afterward.
+
+# tidyTuesday Economist Data [`geom_col`]
 
 I will rely on a small dataset of Facebook likes from the April 16, 2019 #tidyTuesday.^[Thomas Mock (2022). Tidy Tuesday: A weekly data project aimed at the R ecosystem. https://github.com/rfordatascience/tidytuesday.]
 
@@ -69,4 +71,43 @@ corbyn %>%
   guides(fill="none") +
   labs(x="Political Group")
 ```
+
+# tidyTuesday Fast Food Data [`geom_bar`]
+
+I will rely on a dataset of Fast Food calories obtained from (at the time fastfoodnutrition.com, now) [fastfoodnutrition.org](https://fastfoodnutrition.org/) from the September 4, 2018 #tidyTuesday.^[Thomas Mock (2022). Tidy Tuesday: A weekly data project aimed at the R ecosystem. https://github.com/rfordatascience/tidytuesday.]
+
+```{r}
+library(DT)
+FastFood <- read.csv(url("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-09-04/fastfood_calories.csv"), na="NA", row.names = 1) %>% mutate(restaurant = as.factor(restaurant))
+datatable(FastFood, filter="top")
+```
+
+## A Default Plot
+
+The labels are rather long so I will flip the coordinates but this is otherwise a default bar plot.
+
+```{r}
+FastFood %>% 
+  ggplot() +
+  aes(x=restaurant) +
+  geom_bar() +
+  coord_flip()
+```
+
+## A Reordered Axis Plot
+
+The required intermediate step is to count the labels.  To accomplish this, group the data by restaurants and count the number of observations, then ungroup the data, and we can use the same technique as above.
+
+```{r}
+FastFood %>% 
+  group_by(restaurant) %>%
+  mutate(Count = n()) %>%
+  ungroup() %>%
+  ggplot() +
+  aes(x=fct_reorder(restaurant, Count))  +
+  geom_bar() +
+  coord_flip() + 
+  labs(x="Restaurant")
+```
+
 
