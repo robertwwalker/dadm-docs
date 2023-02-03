@@ -1,0 +1,68 @@
+---
+title: "Reordering Barplot Axes"
+author: "Robert W. Walker"
+format: 
+   html:
+     self-contained: true
+     self-contained-math: true
+     code-fold: true
+     code-copy: hover
+     code-block-border-left: true
+     df-print: paged
+     embed-resources: true
+     fig-format: retina
+     footnotes-hover: true
+     html-math-method: katex
+     mainfont: Playfair Display
+     toc: true
+     toc-title: Navigation
+     theme: simplex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE, message=FALSE, warning=FALSE)
+library(tidyverse)
+library(hrbrthemes)
+theme_set(theme_ipsum())
+```
+
+# tidyTuesday Economist Data
+
+I will rely on a small dataset of Facebook likes from the April 16, 2019 #tidyTuesday.^[Thomas Mock (2022). Tidy Tuesday: A weekly data project aimed at the R ecosystem. https://github.com/rfordatascience/tidytuesday.]
+
+```{r}
+corbyn <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-04-16/corbyn.csv")
+corbyn
+```
+
+The data is perfect for our purposes because it is small but will also plot in an ugly order because of alphabetization.  The first thing to emphasize is that the data need be in a tabular format; the raw data will not fit this approach.  The goal of the short post is to demonstrate how to change the order of the $x$ or $y$ in a barplot.
+
+## A Default Plot
+
+I want to plot facebook likes and UK political figures.  I will also flip the axes, change some labels, and remove the color legend because it is obvious from the plot.
+
+```{r}
+corbyn %>% 
+  ggplot() +
+  aes(x=political_group, avg_facebook_likes, y=avg_facebook_likes, fill=political_group) +
+  geom_col() +
+  coord_flip() +
+  labs(x="Political Group") + 
+  guides(fill="none")
+```
+
+## Reordering political_group
+
+The `forcats` package in the `tidyverse` contains a number of functions to assist with categorical variables.  Here I will use `fact_reorder()` which will contain two options, what do I want to reorder and what variable determines the orders.
+
+```{r}
+corbyn %>% 
+  ggplot() +
+  aes(x=fct_reorder(political_group, avg_facebook_likes), y=avg_facebook_likes, fill=political_group) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_viridis_d() +
+  guides(fill="none") +
+  labs(x="Political Group")
+```
+
