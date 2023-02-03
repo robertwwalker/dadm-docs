@@ -19,7 +19,11 @@ In a 2014 paper in the __Journal of Statistical Software__, {citation: Wickham, 
 
 ![tidy data](img/Screenshot 2023-02-01 at 4.43.55 PM.png)
 
-The raison d'etre for pivoting operations examined in this post is the manipulation of *untidy* data into a tidy format.
+The raison d'etre for pivoting operations examined in this post is the manipulation of *untidy* data into a tidy format.  In his article, Hadley discusses five key ways that data are typically **untidy** though this is far from an exhaustive list [Wickham, p. 5]
+
+![Five untidy tendencies](img/Screenshot 2023-02-02 at 10.03.57 AM.png)
+
+The terms melting and casting have been, to a large extent, superseded by two variations on the main term: `pivot_` and the newest iterations of `tidyr` have adopted `pivot_long` for *melting* and `pivot_wider` for *casting*.  The former is the process of elongating or stacking data to make it tidy while the latter is essentially the inverse, taking wide data and making it long.  In the final example on weather data provided here, I show an example that requires both to produce a tidy product.
 
 # Package and Some Details
 
@@ -151,11 +155,11 @@ I am going to use an Intel [INTC] Income Statement that I obtained from their we
 I want to import the data from .csv.  If you follow the link above to view the Income Statement on Github you will see the extracted .csv file.
 
 ```{r}
-Intel.IS <- read_csv("https://github.com/robertwwalker/DADMStuff/raw/master/Intel_Financial_Report-2022-IS.csv")
+Intel.IS <- read_csv("https://github.com/robertwwalker/DADMStuff/raw/master/Intel_Financial_Report-2022-IS.csv", col_names = FALSE)
 datatable(Intel.IS)
 ```
 
-First, notice three identification lines that I will want to drop, lines 1, 3, and 21.  There are also some dollar signs and commas separating the amounts for formatting purposes that I need to fix; they currently prevent the data from being read as numeric.  For now, I will skip line 1 (`skip=1`) and force the columns to be character, numeric, numeric, numeric; `read_csv` abbreviates those with quoted "cnnn": `col_types="cnnn"`.  I also want to trim whitespaces with `trim_ws=T`  I learned this from the help.
+First, notice three identification lines that I will want to drop, lines 1, 3, and 21.  By default, `read_csv` makes the column names out of the first row.  I have turned that off here to get the row numbers to match the .csv file.  There are also some dollar signs and commas separating the amounts for formatting purposes that I need to fix; they currently prevent the data from being read as numeric.  For now, I will skip line 1 (`skip=1`) and force the columns to be character, numeric, numeric, numeric; `read_csv` abbreviates those with quoted "cnnn": `col_types="cnnn"`.  I also want to trim whitespaces with `trim_ws=T`  I learned this from the help.
 
 ```{r}
 Intel.IS <- read_csv("https://github.com/robertwwalker/DADMStuff/raw/master/Intel_Financial_Report-2022-IS.csv", skip=1, col_types = "cnnn", trim_ws=T)
@@ -169,7 +173,7 @@ library(vroom)
 problems(Intel.IS)
 ```
 
-Those are the original rows 3 and 21 that I wished to skip (recall I skipped 1).  I have one unnamed column and three columns that are named by the date of the Income Statement.  Let me rename the unnamed column to be Entry and then filter out the rows with **Entry** equal to "Income Statement [Abstract]" and "Weighted average shares of common stock outstanding:" as those are the identified issues.
+Those are the original rows 3 and 21 that I wished to skip (recall I skipped 1 and the column names are drawn from row 2 of the original .csv file).  I have one unnamed column and three columns that are named by the date of the Income Statement.  Let me rename the unnamed column to be Entry and then filter out the rows with **Entry** equal to "Income Statement [Abstract]" and "Weighted average shares of common stock outstanding:" as those are the identified issues.
 
 ```{r}
 Intel.IS.Clean <- Intel.IS %>% 
@@ -243,7 +247,7 @@ NWS.Daily <- NWS.Daily %>%
 head(NWS.Daily)
 ```
 
-Now to get rid of the Day. prefix to only keep the numbers and then pivot the four distinct variable back to columns.  I then want to recode some items, `T` is trace so I want to set it to 0.005 for both snow and precipitation before verifying that all the numeric columns are numeric and then combine the years, months, and days together into something that can be formatted as a date.
+Now to get rid of the Day. prefix to only keep the numbers and then pivot the four distinct variable back to columns.  I then want to recode some items, `T` is trace so I want to set it to 0.005 for both snow and precipitation before verifying that all the numeric columns are numeric and then combine the years, months, and days together into something that can be formatted as a date.  In the language of *
 
 ```{r}
 NWS.Daily <- NWS.Daily %>% 
