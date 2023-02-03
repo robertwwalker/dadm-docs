@@ -53,7 +53,11 @@ corbyn %>%
 
 ## Reordering political_group
 
-The `forcats` package in the `tidyverse` contains a number of functions to assist with categorical variables.  Here I will use `fact_reorder()` which will contain two options, what do I want to reorder and what variable determines the orders.
+The `forcats` package in the `tidyverse` contains a number of functions to assist with categorical variables.  Here I will use `fct_reorder()` which will contain two options, what do I want to reorder and what variable determines the orders.  I have provided a screen shot of the help file below.
+
+![Help fct_reorder](img/Screenshot 2023-02-03 at 9.20.12 AM.png)
+
+My method for integrating this into the plot is to change the $x$ axis variable.  Specifically, `fct_reorder(political_group, avg_facebook_likes)`.  I order the political groups [the factor] by the number of average facebook likes [the x].
 
 ```{r}
 corbyn %>% 
