@@ -84,6 +84,25 @@ code span.st { color: #4070a0; } /* String */
 code span.va { color: #19177c; } /* Variable */
 code span.vs { color: #4070a0; } /* VerbatimString */
 code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
 </style>
 
 
@@ -139,6 +158,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#removing-junk" id="toc-removing-junk" class="nav-link" data-scroll-target="#removing-junk">Removing Junk</a></li>
   <li><a href="#a-plot-to-test-the-data" id="toc-a-plot-to-test-the-data" class="nav-link" data-scroll-target="#a-plot-to-test-the-data">A Plot to Test the Data</a></li>
   </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
 </div>
@@ -689,7 +709,7 @@ Warning in mask$eval_all_mutate(quo): NAs introduced by coercion</code></pre>
 </section>
 <section id="a-plot-to-test-the-data" class="level2">
 <h2 class="anchored" data-anchor-id="a-plot-to-test-the-data">A Plot to Test the Data</h2>
-<p>Let me plot the data to verify the result.</p>
+<p>Let me plot the data to verify the result. They are plotted using a <em>ribbon</em> geometry that colors the temperature range from the high to the low for the day. I have created a midpoint between the high and low and used a 7-day moving average of that midpoint here (using the <code>slider</code> package).</p>
 <div class="cell" data-hash="index_cache/html/unnamed-chunk-23_6dbb0f4379d8397ba01cdcd17bc7d315">
 <details>
 <summary>Code</summary>
@@ -723,8 +743,70 @@ Warning in mask$eval_all_mutate(quo): NAs introduced by coercion</code></pre>
 </div>
 </section>
 </section>
+<section id="references" class="level1">
+<h1>References</h1>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-24_6afc581aaa1519f38597d3e4d26917db">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">write_bib</span>(<span class="fu">names</span>(<span class="fu">sessionInfo</span>()<span class="sc">$</span>otherPkgs), <span class="at">file=</span><span class="st">"bibliography.bib"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 
-</main>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-R-janitor" class="csl-entry" role="doc-biblioentry">
+Firke, Sam. 2021. <em>Janitor: Simple Tools for Examining and Cleaning Dirty Data</em>. <a href="https://github.com/sfirke/janitor">https://github.com/sfirke/janitor</a>.
+</div>
+<div id="ref-R-vroom" class="csl-entry" role="doc-biblioentry">
+Hester, Jim, Hadley Wickham, and Jennifer Bryan. 2022. <em>Vroom: Read and Write Rectangular Text Data Quickly</em>. <a href="https://CRAN.R-project.org/package=vroom">https://CRAN.R-project.org/package=vroom</a>.
+</div>
+<div id="ref-R-tibble" class="csl-entry" role="doc-biblioentry">
+Müller, Kirill, and Hadley Wickham. 2022. <em>Tibble: Simple Data Frames</em>. <a href="https://CRAN.R-project.org/package=tibble">https://CRAN.R-project.org/package=tibble</a>.
+</div>
+<div id="ref-R-patchwork" class="csl-entry" role="doc-biblioentry">
+Pedersen, Thomas Lin. 2022. <em>Patchwork: The Composer of Plots</em>. <a href="https://CRAN.R-project.org/package=patchwork">https://CRAN.R-project.org/package=patchwork</a>.
+</div>
+<div id="ref-R-slider" class="csl-entry" role="doc-biblioentry">
+Vaughan, Davis. 2022. <em>Slider: Sliding Window Functions</em>. <a href="https://CRAN.R-project.org/package=slider">https://CRAN.R-project.org/package=slider</a>.
+</div>
+<div id="ref-ggplot22016" class="csl-entry" role="doc-biblioentry">
+Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York. <a href="https://ggplot2.tidyverse.org">https://ggplot2.tidyverse.org</a>.
+</div>
+<div id="ref-R-forcats" class="csl-entry" role="doc-biblioentry">
+———. 2022a. <em>Forcats: Tools for Working with Categorical Variables (Factors)</em>. <a href="https://CRAN.R-project.org/package=forcats">https://CRAN.R-project.org/package=forcats</a>.
+</div>
+<div id="ref-R-stringr" class="csl-entry" role="doc-biblioentry">
+———. 2022b. <em>Stringr: Simple, Consistent Wrappers for Common String Operations</em>. <a href="https://CRAN.R-project.org/package=stringr">https://CRAN.R-project.org/package=stringr</a>.
+</div>
+<div id="ref-R-tidyverse" class="csl-entry" role="doc-biblioentry">
+———. 2022c. <em>Tidyverse: Easily Install and Load the Tidyverse</em>. <a href="https://CRAN.R-project.org/package=tidyverse">https://CRAN.R-project.org/package=tidyverse</a>.
+</div>
+<div id="ref-tidyverse2019" class="csl-entry" role="doc-biblioentry">
+Wickham, Hadley, Mara Averick, Jennifer Bryan, Winston Chang, Lucy D’Agostino McGowan, Romain François, Garrett Grolemund, et al. 2019. <span>“Welcome to the <span class="nocase">tidyverse</span>.”</span> <em>Journal of Open Source Software</em> 4 (43): 1686. <a href="https://doi.org/10.21105/joss.01686">https://doi.org/10.21105/joss.01686</a>.
+</div>
+<div id="ref-R-ggplot2" class="csl-entry" role="doc-biblioentry">
+Wickham, Hadley, Winston Chang, Lionel Henry, Thomas Lin Pedersen, Kohske Takahashi, Claus Wilke, Kara Woo, Hiroaki Yutani, and Dewey Dunnington. 2022. <em>Ggplot2: Create Elegant Data Visualisations Using the Grammar of Graphics</em>. <a href="https://CRAN.R-project.org/package=ggplot2">https://CRAN.R-project.org/package=ggplot2</a>.
+</div>
+<div id="ref-R-dplyr" class="csl-entry" role="doc-biblioentry">
+Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2022. <em>Dplyr: A Grammar of Data Manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>.
+</div>
+<div id="ref-R-tidyr" class="csl-entry" role="doc-biblioentry">
+Wickham, Hadley, and Maximilian Girlich. 2022. <em>Tidyr: Tidy Messy Data</em>. <a href="https://CRAN.R-project.org/package=tidyr">https://CRAN.R-project.org/package=tidyr</a>.
+</div>
+<div id="ref-R-purrr" class="csl-entry" role="doc-biblioentry">
+Wickham, Hadley, and Lionel Henry. 2023. <em>Purrr: Functional Programming Tools</em>. <a href="https://CRAN.R-project.org/package=purrr">https://CRAN.R-project.org/package=purrr</a>.
+</div>
+<div id="ref-R-readr" class="csl-entry" role="doc-biblioentry">
+Wickham, Hadley, Jim Hester, and Jennifer Bryan. 2022. <em>Readr: Read Rectangular Text Data</em>. <a href="https://CRAN.R-project.org/package=readr">https://CRAN.R-project.org/package=readr</a>.
+</div>
+<div id="ref-R-scales" class="csl-entry" role="doc-biblioentry">
+Wickham, Hadley, and Dana Seidel. 2022. <em>Scales: Scale Functions for Visualization</em>. <a href="https://CRAN.R-project.org/package=scales">https://CRAN.R-project.org/package=scales</a>.
+</div>
+<div id="ref-R-DT" class="csl-entry" role="doc-biblioentry">
+Xie, Yihui, Joe Cheng, and Xianying Tan. 2022. <em>DT: A Wrapper of the JavaScript Library DataTables</em>. <a href="https://github.com/rstudio/DT">https://github.com/rstudio/DT</a>.
+</div>
+</div></section></div></main>
 <!-- /main column -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {

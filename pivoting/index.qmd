@@ -1,5 +1,8 @@
 ---
 title: "Pivoting: Wide and Long"
+bibliography: "bibliography.bib"
+nocite: |
+     @*
 author: "Robert W. Walker"
 format: 
    html:
@@ -278,7 +281,7 @@ head(NWS.Daily.Clean)
 
 ## A Plot to Test the Data
 
-Let me plot the data to verify the result.
+Let me plot the data to verify the result.  They are plotted using a *ribbon* geometry that colors the temperature range from the high to the low for the day.  I have created a midpoint between the high and low and used a 7-day moving average of that midpoint here (using the `slider` package).
 
 ```{r}
 library(slider)
@@ -304,5 +307,11 @@ Plot.Mini <- NWS.Daily.Clean %>%
   guides(alpha="none", colour="none")
 library(patchwork)
 Plot.All / Plot.Mini
+```
+
+# References
+
+```{r}
+knitr::write_bib(names(sessionInfo()$otherPkgs), file="bibliography.bib")
 ```
 
