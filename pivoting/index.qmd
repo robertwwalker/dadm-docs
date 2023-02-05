@@ -155,8 +155,9 @@ I am going to use an Intel [INTC] Income Statement that I obtained from their we
 I want to import the data from .csv.  If you follow the link above to view the Income Statement on Github you will see the extracted .csv file.
 
 ```{r}
+library(readr)
 Intel.IS <- read_csv("https://github.com/robertwwalker/DADMStuff/raw/master/Intel_Financial_Report-2022-IS.csv", col_names = FALSE)
-datatable(Intel.IS)
+Intel.IS
 ```
 
 First, notice three identification lines that I will want to drop, lines 1, 3, and 21.  By default, `read_csv` makes the column names out of the first row.  I have turned that off here to get the row numbers to match the .csv file.  There are also some dollar signs and commas separating the amounts for formatting purposes that I need to fix; they currently prevent the data from being read as numeric.  For now, I will skip line 1 (`skip=1`) and force the columns to be character, numeric, numeric, numeric; `read_csv` abbreviates those with quoted "cnnn": `col_types="cnnn"`.  I also want to trim whitespaces with `trim_ws=T`  I learned this from the help.
