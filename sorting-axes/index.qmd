@@ -1,6 +1,9 @@
 ---
 title: "Reordering Barplot Axes"
 author: "Robert W. Walker"
+bibliography: "bibliography.bib"
+nocite: |
+     @*
 format: 
    html:
      self-contained: true
@@ -110,4 +113,9 @@ FastFood %>%
   labs(x="Restaurant")
 ```
 
+# References
+
+```{r}
+knitr::write_bib(names(sessionInfo()$otherPkgs), file="bibliography.bib")
+```
 
