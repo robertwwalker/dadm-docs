@@ -1,9 +1,25 @@
 ---
 title: "Week 3 Data"
 author: "RWW"
+bibliography: "bibliography.bib"
+nocite: |
+     @*
 format: 
    html:
+     self-contained: true
+     self-contained-math: true
      code-fold: true
+     code-copy: hover
+     code-block-border-left: true
+     df-print: paged
+     embed-resources: true
+     fig-format: retina
+     footnotes-hover: true
+     html-math-method: katex
+     mainfont: Playfair Display
+     toc: true
+     toc-title: Navigation
+     theme: simplex
 ---
 
 ## Load the Data
@@ -62,3 +78,8 @@ datatable(FastFood)
 datatable(CEOComp)
 ```
 
+# References
+
+```{r}
+knitr::write_bib(names(sessionInfo()$otherPkgs), file="bibliography.bib")
+```
