@@ -1,0 +1,57 @@
+---
+title: "Probability Calculation in R"
+author: "RWW"
+format: 
+   html:
+     self-contained: true
+     self-contained-math: true
+     code-fold: true
+     code-copy: hover
+     code-block-border-left: true
+     df-print: paged
+     embed-resources: true
+     fig-format: retina
+     footnotes-hover: true
+     html-math-method: katex
+     mainfont: Playfair Display
+     toc: true
+     toc-title: Navigation
+     theme: simplex
+---
+
+In an example problem in the slides, we have a drug test.  It is 99% accurate for Users and 95% accurate for non-Users.  We are told to assume that 10% of the population uses the drug in question.  Let's start by representing that latter fact.
+
+```{r}
+Marginal.Probabilities <- c(0.1,0.9)
+names(Marginal.Probabilities) <- c("User","Non-User")
+Marginal.Probabilities
+```
+
+Now I want to represent the conditional probabilities given above for the rest.
+
+```{r}
+Test.Conditional.Probabilities <- matrix(data=c(0.99,0.01,0.05,0.95), byrow=T, nrow=2, dimnames = list(c("User","Non-User"), c("Positive","Negative")))
+Test.Conditional.Probabilities
+```
+
+From this, I can calculate the joint probabilities by multiplying a set of two conditional probabilities by the associated marginal probabilities.
+
+```{r}
+Joint <- Test.Conditional.Probabilities*Marginal.Probabilities
+Joint
+```
+
+That gives me the table of joint probabilities that I sought.
+
+Answering questions here, for example, what is the total proportion of positive tests?
+
+```{r}
+sum(Joint[,1])
+```
+
+How about the conditional probability of a User given a positive test?  That would be the joint probability of user and positive divided by the marginal probability of a positive test.  In language, it is the proportion of users (0.099) among all positives (0.144), the remainder are non-users that received positive test results.
+
+```{r}
+Joint[1,1]/sum(Joint[,1])
+```
+
