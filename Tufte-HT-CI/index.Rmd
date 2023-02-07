@@ -6,7 +6,6 @@ date: "`r Sys.Date()`"
 output:
   tufte::tufte_html: 
       tufte_variant: "envisioned"
-      self_contained: true
 ---
 
 ```{r setup, include=FALSE}
@@ -572,5 +571,11 @@ Phone.No <- Churn %>% filter(PhoneService=="No")
 ## More Generally
 
 The base data file `Churn` is available [here as a .csv file](https://raw.githubusercontent.com/robertwwalker/DADMStuff/master/WA_Fn-UseC_-Telco-Customer-Churn.csv) and you can use Data > View and the filter tick box to choose your own features to examine if you so choose.
+
+### Importing the Data Yourself into `radiant`
+
+We could also import the data directly into the `radiant` tool.  To accomplish that we want to import , copy the link above `https://raw.githubusercontent.com/robertwwalker/DADMStuff/master/WA_Fn-UseC_-Telco-Customer-Churn.csv` into `radiant` using the `Load data of type` where type is *url (csv)*  I have provided a screenshot of how it works.
+
+![radiant import data](img/Screenshot 2023-02-07 at 1.26.53 PM.png)
 
 You can, of course, work with the Code examples above on the filtered data or the tables.
