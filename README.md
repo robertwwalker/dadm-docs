@@ -6,3 +6,4 @@ Documents that reside here:
 - [Sorting Axes in `ggplot` barplots](./sorting-axes/)
 - [Pivoting Wide and Long](./pivoting/)
 - [Probabilities in R](./probabilities-R/)
+- [Tufte Document on Hypothesis Tests and Confidence Intervals](./Tufte-HT-CI/)

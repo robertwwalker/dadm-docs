@@ -1,0 +1,576 @@
+---
+title: "The Duality of Hypothesis Testing and Confidence Intervals"
+subtitle: "Proportions" # only for html output
+author: "Robert W. Walker"
+date: "`r Sys.Date()`"
+output:
+  tufte::tufte_html: 
+      tufte_variant: "envisioned"
+      self_contained: true
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+# invalidate cache when the tufte version changes
+knitr::opts_chunk$set(cache.extra = packageVersion('tufte'), echo = TRUE, warning=FALSE, message=FALSE)
+options(htmltools.dir.version = FALSE)
+```
+
+# Churn and Tables
+
+Let me work with some data on `Churn`.
+
+```{r churn}
+Churn <- read.csv(url("https://raw.githubusercontent.com/robertwwalker/DADMStuff/master/WA_Fn-UseC_-Telco-Customer-Churn.csv"))
+library(tidyverse)
+library(janitor)
+library(radiant)
+```
+
+Let me build some tables to see what we are working with.
+
+```{r}
+table(Churn$Churn)
+Churn %>% tabyl(Churn) %>% adorn_totals()
+```
+
+## Details of Observed Churn
+
+`r newthought('The observed churn rate in this sample is 0.265 or 26.5%.  Suppose that the company has a target churn rate of 25 percent.')`  
+```{marginfigure}
+That's an hypothesis regarding the probability that a random customer churns.  It's an informed company choice about an important organizational metric.
+```
+
+**What do we know?  A number of customers and a hypothetical probability -- 0.25.  And we also have some data -- the 0.265.  The observed data are 0.015 larger than the company thinks they should be.**
+
+```{marginfigure}
+*A binomial with size = 7043 and probability of churning for each individual that is equal to 0.25 is what the company thinks is going on.*  The binomial will show the number of Churns on the x axis and the probability of each value on the y axis.
+```
+
+Let's plot it with the red line showing where our data locate.
+
+```{r, fig.margin=TRUE}
+data.frame(x=seq(1500,2000), # A sequence of x values 
+           Prob = dbinom(seq(1500,2000), size=7043, 0.25))  %>% # Probability for each x
+  ggplot() + # Plot
+  aes(x=x, y=Prob) + # x as x and y as Prob defined above.
+  geom_col() + # a bar plot with x and y
+  geom_vline(aes(xintercept=1869), color="red") + # a vertical line at 1869
+  geom_text(aes(x=1869, y=0.01, label="The Data"), color="red") + # An annotation for the data
+  theme_minimal() + 
+  labs(x="Churners", title="Probability of Churners given Binomial(7043, 0.25)")
+```
+
+We can also use radiant's `Probability Calculator` with 1500 and 2000 as values.
+
+```{r fig.margin=TRUE}
+result <- prob_binom(
+  n = 7043, 
+  p = 0.25, 
+  lb = 1500, 
+  ub = 2000, 
+  dec = 5
+)
+plot(result) + labs(title="radiant binomial(n=7043, p=0.25)")
+```
+
+# An Hypothesis Test
+
+`r newthought('How likely would I be to get the data that I did if 25% is true?')`  **That's a question I can answer**; how likely is the 1869 that I received?  Compared to what?  
+
+I want to know how likely I would be to get 1869 or more so let's add up all of the values at 1869 and higher [everything above 1868 as a binomial probability].  Returning to how likely?  The answer is, **not very: 0.0016 or 16 times in 10,000 would we have obtained the data if the real $\pi$ is 0.25.**
+
+```{r, fig.margin=TRUE}
+res <- prob_binom(n=7043, p = 0.25, ub=1869, dec = 7)
+plot(res)
+summary(res)
+# Everything above 1868
+pbinom(1868, 7043, 0.25, lower.tail=FALSE) 
+```
+
+## Mechanics
+
+```{marginfigure}
+**Some Indeterminacy**
+How will we decide?  We want to turn this into a binary/logical decision; that is, which hypothesis is actually correct and now we need to be specific about how much **confidence** we wish to have.  For a variety of reasons 95% confidence or 0.95 probability is the default.  We will expect to be wrong about 1 time in 20.  We expect to be in error with probability 0.05. **We will adopt 95 percent confidence and 5 percent error.**
+```
+
+The mechanics of hypothesis testing lay on top of this intuition.  There are three potential hypotheses and we need to think in terms of evidence against them.  Each is specified as an **exhaustive** set in the sense that any result is consistent with one or the other hypotheses -- there is no indeterminacy.  But there is some; we will adopt 95 percent confidence.
+
+```{r fig.margin=TRUE, echo=FALSE}
+res <- prob_binom(n=7043, p = 0.25, plb=0.025, pub=0.975, dec = 7)
+plot(res, type="prob")
+```
+
+
+1. First, we could ask if the probability of churn, $\pi = 0.25$ as opposed to not equal: $\pi \neq 0.25$.  The $\pi=0.25$ is a null hypothesis; the claim to be evaluated.  The alternative must then be anything that is not exactly $\pi = 0.25$.  That would mean that observed churn is either too big or too small once we look at the data to support the view that it is actually 0.25.  In radiant, that is alternative two-sided -- not equal to.  **Anything in red or grey is unacceptable**  
+
+```{r fig.margin=TRUE, echo=FALSE}
+res <- prob_binom(n=7043, p = 0.25, plb=0.05, dec = 7)
+plot(res, type="prob")
+```
+
+2. Second, we could make a directional claim about $\pi$.  
+  + **We could ask, is $\pi \geq 0.25$?**  Do we have at least one-quarter churning?  The only relevant evidence in this case that would lead us to deny that claim is evidence that $\pi$ is actually less.  The alternative, then, is that $pi < 0.25$.  In radiant, that is alternative less than; it appears in the figure in red.  
+
+```{r fig.margin=TRUE, echo=FALSE}
+res <- prob_binom(n=7043, p = 0.25, pub=0.95, dec = 7)
+plot(res, type="prob")
+```
+
+  + **We could ask, is $\pi \leq 0.25$?**  Do we have at most one-quarter churning?  The only relevant evidence in this case that would lead us to deny that claim is evidence that $\pi$ is actually more than 0.25.  The alternative, then, is that $\pi > 0.25$.  In radiant, that is alternative greater; it appears in the figure in grey.  
+
+# The Binomial Test [binom.test]
+
+This will be called a *binomial test* or *binom.test* in R.  Radiant requires data to do this, whereas binomial tests could just take the number of churns and the size/n.  Thankfully, we have the data.
+
+## Alternative: Two-sided [the default]
+
+```{marginfigure}
+**We will compare the claim that $\pi = 0.25$ against the alternative that $\pi \neq 0.25$.**  
+```
+
+```{marginfigure}
+**Output**
+
+Radiant is clear about the comparison, it tells us the claim being evaluated and the alternative.  In this case, it is equal [the null hypothesis] to 0.25 or not equal to 0.25.  
+
+**Relevant Evidence**
+
+We can deploy two approaches.  One based on confidence intervals and the other based on p-values from hypothesis testing.
+```
+
+```{marginfigure}
+**Confidence intervals**
+  
+We can obtain a 95 percent confidence interval by solving for the values of $\pi$ that could generate the data we observer with probability 0.95.  In this case, it ranges from 0.255 to 0.276.  If the claimed value of $\pi = 0.25$ is in this range, then we cannot rule out that $\pi=0.25$.  If $0.25$ is not in this range, this evidence that $\pi \neq 0.25$.  **0.25 is too small with 95% confidence so we must conclude that $P(Churn) \neq 0.25$.**
+```
+
+```{marginfigure}
+**p-value or probability value**
+
+The probability of having seen the data that we observed or something even more extreme, whether bigger or smaller, if the null hypothesis was true is reflected in the p-value/p.value.  In our case, what is the probability of observing something as extreme as 1869 if, in fact, the probability of churning is 0.25?  **It is quite unlikely: 0.003; this combines the probability above what we obtained and below the negative of what we obtained.  As a result, P(Churn) is extremely unlikely to be 0.25.  Moreover, this p-value is beneath the 0.05 level of acceptable error that we earlier resolved.**
+```
+
+
+```{r}
+binom.test(1869, 7043, p = 0.25)
+```
+
+```{r}
+result <- single_prop(Churn, var = "Churn", lev = "Yes", comp_value = 0.25)
+summary(result)
+```
+
+
+The various output parts.  There is summary information that I will define below.
+
+Label  | definition
+-------|-------------
+p | the sample proportion of churners 
+ns | number of Yes values: 1769  
+n | 7043, no missing.  
+sd | standard deviation $\sqrt{p*(1-p)}$ or $\sqrt{\pi*(1-\pi)}$
+se | standard error of the proportion $\sqrt{\frac{p*(1-p)}{n}}$ or $\sqrt{\frac{\pi*(1-\pi)}{n}}$
+me | margin of error [the plus or minus with the specified level of confidence] such that the confidence interval spans $p$ plus or minus **me**.  
+diff | difference between $\pi$ and $p$.  
+2.5% | the lower bound of the confidence interval
+97.5% | the upper bound of the confidence interval
+
+
+## Alternative: Greater than
+
+```{marginfigure}
+**We will compare the claim that $\pi \leq 0.25$ against the alternative that $\pi \gt 0.25$.**  
+
+**Output**
+The actual output is almost identical except for the different statements of the alternatives [note radiant does not note the less than in the null hypothesis].  
+
+**Relevant Evidence**
+
+The only relevant evidence to the claim that $\pi \leq 0.25$ is evidence that it is actually greater.  We have exactly this evidence.  Our sample proportion is 0.265.  The only remaining question is to consider the probability associated with this evidence.
+```
+
+```{marginfigure}
+**Confidence interval**
+
+**Given the data, what is the smallest that p(Churn) can be with 95% confidence?**  The evidence says that the 5th percentile of P(Churn) is 0.257.   The company claim is 0.25 but this is far below what the evidence supports with 95 percent confidence.  P(Churn) is not less than or equal to 0.25 but is instead greater; **at a minimum, with 95 percent confidence, P(Churn) is 0.257.**
+```
+
+
+```{marginfigure}
+**P-value**
+
+**What is the probability of 1869 or more if size is 7043 and p(Churn) is 0.25?**  This is the same probability 0.0016 [rounded to 0.002] that we obtained at the beginning.   The evidence suggests that P(Churn) is not less than or equal to 0.25 but is instead greater because 0.002 is far below the standard of 0.05 that we set for making decisions.  **P(Churn) is not less than or equal to 0.25 with 95 percent confidence.**
+```
+
+```{r}
+binom.test(1869, 7043, p = 0.25, alt="g")
+result <- single_prop(Churn, var = "Churn", lev = "Yes", comp_value = 0.25, alternative = "greater")
+summary(result)
+```
+
+## Alternative: Less than
+
+```{marginfigure}
+**We will compare the claim that $\pi \geq 0.25$ against the alternative that $\pi \lt 0.25$.**  
+
+**Output**
+
+Different statements of the alternatives [note radiant does not note the greater than in the null hypothesis].  There are two key differences in the evidence and interpretation.  
+
+**Relevant Evidence**
+
+The only relevant evidence to the claim that $\pi \geq 0.25$ is evidence that it is actually less, but we have a sample proportion of 0.265.  It is greater than or equal to 0.25 instead of less.
+```
+
+```{marginfigure}
+**p-value**
+
+The p-value shows the probability that $\pi$ is greater than or equal to 0.25 and, with data so far above 0.25, that is nearly one. **This p-value is far above the standard of 0.05 that we set so we are left with the claim that $\pi \geq 0.25$ because there is little evidence against it.**
+```
+
+```{marginfigure}
+**Confidence interval**
+
+The confidence interval shows that, with 95 percent confidence, P(Churn) could be as high as 0.274. This does not really help to adjudicate the claim except to say that 0.25 or greater remains probable.
+```
+
+```{r}
+binom.test(1869, 7043, p = 0.25, alt="l")
+result <- single_prop(Churn, var = "Churn", lev = "Yes", comp_value = 0.25, alternative = "less")
+summary(result)
+```
+
+# The normal approximation [prop.test]
+
+So long as $n*\pi$ and $n*(1-\pi)$ are greater than about 10, we can approximate a binomial with a normal.  The exercise is instructive as $t$ for means works similarly.
+
+```{r, fig.margin=TRUE}
+plot(prob_norm(0, 1, lb=-4, ub=4)) + labs(x="z", title="Normal(0,1)") + theme_minimal()
+```
+
+```{marginfigure}
+The equation says $$ z = \frac{\hat{p} - \pi}{\sqrt{\frac{\pi(1-\pi)}{n}}}$$
+
+Presume 95 percent confidence and now let me plot $z$.  Notice, 0.95 is easy to work with because it is almost exactly 2 [-1.96 to 1.96].  The metric of $z$ is the standard deviation though, in this case -- because we are characterizing a statistic -- the standard error.  Anything that is within 1.96 standard errors, plus or minus, will be possible with 95% confidence.  The remaining probability would consist of 0.025 too small and 0.025 too big.  
+```
+
+```{r, fig.margin=TRUE}
+plot(prob_norm(0, 1, plb=0.025, pub=0.975), type="probs") + labs(title="95% of Normal(0,1): [-1.96,1.96]") + theme_minimal()
+summary(prob_norm(0, 1, plb=0.025, pub=0.975), type="probs")
+```
+
+
+Because $\hat{p}$ is our best guess of the probability based on the observed proportion [in this case, that's the 1869 of 7043 or 0.265]; we will use it in building confidence intervals.  If all we have is the data, it turns out that we can solve for $\pi$ though we will have to substitute for it in the standard error formula with the sample proportion $\hat{p}$.
+
+```{r, fig.margin=TRUE}
+plot(prob_norm(0, sqrt(0.265*(1-0.265)/7043), plb=0.025, pub=0.975), type="prob") + labs(x="p-hat - pi", title="Normal: The margin of error") + theme_minimal()
+```
+
+$$
+z*\left(\sqrt{\frac{\pi(1-\pi)}{n}}\right) = \underbrace{\hat{p} - \pi}_{Margin.of.error [moe]}
+$$
+
+and then we can obtain the probability distribution for $\pi$ given data $\hat{p}$
+
+```{r, fig.margin=TRUE}
+plot(prob_norm(0.265, sqrt(0.265*(1-0.265)/7043), plb=0.025, pub=0.975), type="prob") + labs(x="P(Churn)", title="Normal: Best Guess at P(Churn)") + theme_minimal()
+```
+
+
+$$
+\pi = \hat{p} - z*\left(\sqrt{\frac{\hat{p}(1-\hat{p})}{n}}\right)
+$$
+
+My $z$ here takes values $-1.96$ and $1.96$ yielding
+
+$$
+\pi = 0.265 - (1.96, -1.96)*\left(\sqrt{\frac{0.265(1-0.265)}{7043}}\right)
+$$
+Or
+
+```{r}
+round((1869/7043) - c(qnorm(0.975),qnorm(0.025))*sqrt((1869/7043)*(1-(1869/7043))/7043), 3)
+prop.test(1869, 7043, p=0.25, correct=FALSE)
+```
+
+```{r, fig.margin=TRUE}
+plot(prob_norm(0, 1, plb=0.025, pub=0.975), type="probs") + labs(title="95% of Normal(0,1): [-1.96,1.96]") + theme_minimal()
+```
+
+Return to the original equation: 
+
+$$ z = \frac{\hat{p} - \pi}{\sqrt{\frac{\pi(1-\pi)}{n}}}$$
+
+## Alternative: Two-sided [not equal]
+
+```{marginfigure}
+**Claim: $\pi=0.25$**  
+
+The alternative is then that $\pi \neq 0.25$.  
+
+**Required Evidence**
+
+To rule out that $\pi = 0.25$, we need to see evidence that is sufficiently greater or smaller than would be expected with 95 percent confidence.
+
+**The Normal for Reference**
+
+The standard normal distribution has 0.95 probability between -1.96 and 1.96.
+```
+
+```{r, fig.margin=TRUE}
+plot(prob_norm(0, 1, plb=0.025, pub=0.975), type="probs") + labs(title="95% of Normal(0,1): [-1.96,1.96]")
+```
+
+```{marginfigure}
+**A Decision Rule for z**
+  
+If the $z$ we obtain is greater than 1.645, this is sufficient evidence to conclude, with 95 percent confidence, that $\pi$ or the probability of Churn is not less than or equal to 0.25 and must be greater.
+
+
+Knowledge of $\pi$ is enough to solve for $z$.
+
+$$ z = \frac{\hat{p} - 0.25}{\sqrt{\frac{0.25(1-0.25)}{7043}}}$$
+
+Our data have 1869 of 7043 [0.2653699], so z is 2.98.
+```
+
+```{r}
+z <- ((1869/7043) - 0.25)/sqrt(0.25*0.75/7043)
+z
+```
+
+```{r, fig.margin=TRUE}
+plot(prob_norm(0, 1, plb=0.025, pub=0.975), type="probs") + labs(title="95% of Normal(0,1): [-1.96,1.96]") + geom_vline(aes(xintercept=c(-2.98,2.98)), color="blue") + theme_minimal()
+```
+
+```{marginfigure}
+The data are 2.98 standard errors above 0.25.  Recalling that evidence to decide it is simply not equal to 0.25 could come from far below or above 0.25.  So how much probability is there in a normal distribution above 2.98 standard deviations/standard errors and below -2.98 standard deviations/standard errors? **0.003**.
+```
+
+```{r}
+1-pnorm(((1869/7043) - 0.25)/sqrt(0.25*0.75/7043)) + # Above
+pnorm(-((1869/7043) - 0.25)/sqrt(0.25*0.75/7043)) # Below
+```
+
+What about the R functions?  It is important to note that prop.test returns a $\chi^2$. If we take the square root, we will get $z$.
+
+```{r}
+prop.test(1869, 7043, p = 0.25)
+result <- single_prop(
+  Churn, 
+  var = "Churn", 
+  lev = "Yes", 
+  comp_value = 0.25, 
+  test = "z"
+)
+summary(result)
+```
+
+## Alternative: Greater
+
+
+```{marginfigure}
+**Claim**
+We claim that $\pi \leq 0.25$ and the complement/alternative must be that $\pi \gt 0.25$. 
+
+**Required Evidence**
+
+To rule out that $\pi \leq 0.25$, we need to see evidence that is sufficiently greater than would be expected with 95 percent confidence.
+
+**The Normal for Reference**
+
+The standard normal distribution has 0.95 probability less than 1.645 and 0.05 greater than 1.645.
+
+**A Decision Rule for z**
+  
+If the $z$ we obtain is greater than 1.645, this is sufficient evidence to conclude, with 95 percent confidence, that $\pi$ or the probability of Churn is not less than or equal to 0.25 and must be greater.
+```
+
+```{marginfigure}
+**Decision using z**
+
+We have already solved for $z$; it was 2.98.  Our $z$ of 2.98 standard errors is far more than the 1.645 standard errors above to decide that $\pi \leq 0.25$ cannot be true with 95 percent confidence.  **The evidence favors the alternative $\pi \gt 0.25$.**
+```
+
+```{r, fig.margin=TRUE}
+plot(prob_norm(0, 1, pub = 0.95), type="probs") + theme_minimal() + labs(title="Normal(0,1)", subtitle="95% of z is less than 1.645") + geom_vline(aes(xintercept=2.98), color="blue")
+# 95th percentile of a normal 0 and 1.
+qnorm(0.95, 0, 1)
+summary(prob_norm(0, 1, pub = 0.95), type="probs")
+```
+
+```{marginfigure}
+**A Rule Using P(Churn)**
+
+How big must P(Churn) be observed to be to render $\pi \leq 0.25$ false?  From the previous, 95 percent of the probability lies below 1.645 standard errors and our standard error is 0.005, thus
+$$ 0.25 + 1.645*0.005 = 0.258$$
+**Any sample proportion greater than 0.258 is too large to believe that $\pi \leq 0.25$ with 95% confidence,**
+```
+
+```{marginfigure}
+**Decision with P(Churn)**
+
+Our data show 0.265; this is very unlikely if $P(Churn)=0.25$ or anything less.  **P(Churn) must be greater than 0.25 with 95 percent confidence because the observed proportion 0.265 is greater than 0.258.**
+
+**Decision with p.value**
+
+If the claim was true and $\pi \leq 0.25$ was true, with what probability might we obtain the observed proportion or more?  In this case, this is the normal probability greater than 2.98 or 0.0015.  **0.0015 is less than 0.05 and $\pi \leq 0.25$ is judged false.  $\pi \gt 0.25$**
+```
+
+```{r, fig.margin=TRUE}
+plot(prob_norm(0.25, sqrt(0.25*0.75/7043), pub = 0.95), type="probs") + theme_minimal() + labs(title="95% Upper Bound given 0.25") + geom_vline(aes(xintercept=0.265), color="blue")
+qnorm(0.95, 0.25, sqrt(0.25*0.75/7043))
+summary(prob_norm(0.25, sqrt(0.25*0.75/7043), pub = 0.95), type="probs")
+```
+
+```{marginfigure}
+**Comment**
+
+It is worth noting that the confidence intervals that are reported are the opposite bound of the alternative.  For example, this case reports an upper bound on P(Churn) because of the `-` sign in the formula.
+```
+
+```{marginfigure}
+**Interpretation of the Confidence Interval**
+
+Given the sample information,
+**with 95 percent confidence, P(Churn) is at least 0.257.**
+```
+
+
+```{r}
+# Using prop.test
+prop.test(1869, 7043, p=.25, alt="g")
+# The radiant result
+result <- single_prop(Churn,
+  var = "Churn", 
+  lev = "Yes", 
+  comp_value = 0.25, 
+  alternative = "greater", 
+  test = "z"
+)
+summary(result)
+```
+
+## Alternative: Less than 0.25
+
+```{marginfigure}
+**Claim**
+We claim that $\pi \geq 0.25$ and the complement/alternative must be that $\pi \lt 0.25$. 
+
+**Required Evidence**
+
+To rule out that $\pi \geq 0.25$, we need to see evidence that it is sufficiently less than would be expected with 95 percent confidence.
+
+**The Normal for Reference**
+
+The standard normal distribution has 0.05 probability less than -1.645.
+```
+
+```{r, fig.margin=TRUE}
+plot(prob_norm(0, 1, pub = 0.05), type="probs") + theme_minimal() + labs(x="z") + geom_vline(aes(xintercept=2.98), color="blue")
+```
+
+```{marginfigure}
+**A Decision in z**
+
+The obtained z of 2.98 [the blue vertical line] in the data is not less than -1.645.  $\pi \geq 0.25$ cannot be ruled out.
+```
+
+```{r}
+# 5th percentile of a normal 0 and 1.
+qnorm(0.05, 0, 1)
+# Radiant output
+summary(prob_norm(0, 1, pub = 0.05), type="probs")
+```
+
+```{marginfigure}
+**Analysis of P(Churn)**
+
+The standard error is 0.005.  1.645 of those [1.645*0.005=0.008] below the claim that $\pi \geq 0.25$ will establish a lower bound on P(Churn).  Put another way, the minimum value of $\hat{p}$: 0.25 [the claim] - 0.008 = 0.242; we cannot see a sample proportion less than 0.242 and continue to believe that $\pi \geq 0.25$ with 95% confidence. 
+
+**Decision with P(Churn)**
+
+Anything below 0.242 with a sample of this size and P(Churn) must be less than 0.25 by the decision rules that we set. Ours is 0.265; we cannot rule out that $\pi \geq 0.25$.
+
+**Decision with p.value**
+
+The p-value approximates the probability that the data might arise if the claim were true -- if $\pi \geq 0.25$.  In this case, the value is very near one [0.999] because the evidence is consistent with the claim [and the alternative ($\pi \lt 0.25$) is certainly not true].
+```
+
+```{r, fig.margin=TRUE}
+plot(prob_norm(0.25, sqrt(0.25*0.75/7043), pub = 0.05), type="probs")  + theme_minimal() + labs(x="P(Churn)") + geom_vline(aes(xintercept=0.265), color="blue")
+```
+
+```{marginfigure}
+**Comment**
+
+It is worth noting that the confidence intervals that are reported are the opposite bound of the alternative.  For example, this case reports an upper bound on P(Churn) because of the `-` sign in the formula.
+```
+
+```{marginfigure}
+**Interpretation of the Confidence Interval**
+
+Given the sample information,
+**with 95 percent confidence, P(Churn) is at most 0.274.**
+```
+
+```{r}
+# Using prop.test
+prop.test(1869, 7043, p=.25, alt="l")
+# Radiant result
+result <- single_prop(Churn,
+  var = "Churn", 
+  lev = "Yes", 
+  comp_value = 0.25, 
+  alternative = "less", 
+  test = "z"
+)
+summary(result)
+```
+
+# Some Concluding Applications
+
+## Contracts
+
+There is an internal squabble about contracts.  The churn rate does not impact the pay scale for front-line sales and this is argued to be inequitable because sales is incentivized to sign up high churn clients for bonuses while penalizing the divisions with compensation impacted by churn.  Use the tools above to think about this question.  To get us started, the easy way is to filter out the data in question.  First, a look at it.
+
+```{r}
+Churn <- read.csv(url("https://raw.githubusercontent.com/robertwwalker/DADMStuff/master/WA_Fn-UseC_-Telco-Customer-Churn.csv"))
+library(janitor)
+Churn %>% tabyl(Contract)
+```
+
+Next, create the data in question.
+
+```{r}
+# Create Churn.OY or One Year
+Churn.OY <- Churn %>% filter(Contract == "One year")
+# Create Churn.TY or Two Year
+Churn.TY <- Churn %>% filter(Contract == "Two year")
+# Create Churn.MTM or Month to month
+Churn.MTM <- Churn %>% filter(Contract == "Month-to-month")
+```
+
+## Phone Service?
+
+It has been suggested that the Churn rates are very different between types of `PhoneService`.
+
+```{r}
+Churn%>% tabyl(PhoneService)
+```
+There are two datasets; one for each type.
+
+```{r}
+# Those with Phone Service are Phone.Yes
+Phone.Yes <- Churn %>% filter(PhoneService=="Yes")
+# Those without Phone Service are Phone.No
+Phone.No <- Churn %>% filter(PhoneService=="No")
+```
+
+## More Generally
+
+The base data file `Churn` is available [here as a .csv file](https://raw.githubusercontent.com/robertwwalker/DADMStuff/master/WA_Fn-UseC_-Telco-Customer-Churn.csv) and you can use Data > View and the filter tick box to choose your own features to examine if you so choose.
+
+You can, of course, work with the Code examples above on the filtered data or the tables.
