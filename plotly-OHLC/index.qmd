@@ -1,0 +1,81 @@
+---
+title: "OHLC Data and plotly"
+bibliography: "bibliography.bib"
+nocite: |
+     @*
+author: "Robert W. Walker"
+format: 
+   html:
+     self-contained: true
+     self-contained-math: true
+     code-fold: true
+     code-copy: hover
+     code-block-border-left: true
+     df-print: paged
+     embed-resources: true
+     fig-format: retina
+     footnotes-hover: true
+     html-math-method: katex
+     mainfont: Playfair Display
+     toc: true
+     toc-title: Navigation
+     theme: simplex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE, message=FALSE, warning=FALSE)
+```
+
+# plotly for OHLC
+
+OHLC data on Intel stock price.  The `tidyquant` packages makes the acquisition of stock market data easy by entering the ticker.  Let's try this for Intel, ticker **INTC**.
+
+```{r}
+library(tidyquant)
+library(tidyverse)
+library(magrittr)
+# Use tidyquant to get the data
+INTC <- tq_get("INTC")
+# Slice off the most recent 120 days
+# INTC.tail <- tail(INTC, 120)
+INTC %<>% mutate(
+    open = round(open, digits=2),
+    close = round(close, digits=2),
+    high = round(high, digits=2),
+    low = round(low, digits=2),
+    adjusted = round(adjusted, digits=2)
+    )
+```
+
+Let's have a look at the data.
+
+```{r}
+library(DT)
+datatable(INTC.tail)
+```
+
+## The Plot
+
+There are a few charts specifically designed for OHLC data that are included in `plotly`.  Here I want to deploy a basic one with one modification.  I want daily increases in black and daily decreases in red.
+
+```{r}
+library(plotly)
+# basic example of ohlc charts
+# custom colors
+i <- list(line = list(color = '#000000')) # black
+d <- list(line = list(color = '#FF0000')) # red
+# Create the figure
+fig.2 <- INTC %>%
+  plot_ly(x = ~date, type="ohlc",
+          open = ~open, close = ~close,
+          high = ~high, low = ~low,
+          increasing = i, decreasing = d)
+fig.2
+```
+
+# References
+
+```{r}
+knitr::write_bib(names(sessionInfo()$otherPkgs), file="bibliography.bib")
+```
+
