@@ -7,3 +7,4 @@ Documents that reside here:
 - [Pivoting Wide and Long](https://robertwwalker.github.io/dadm-docs/pivoting/)
 - [Probabilities in R](https://robertwwalker.github.io/dadm-docs/probabilities-R/)
 - [Tufte Document on Hypothesis Tests and Confidence Intervals](https://robertwwalker.github.io/dadm-docs/Tufte-HT-CI/)
+- [Using plotly for OHLC data](https://robertwwalker.github.io/dadm-docs/plotly-OHLC/)
