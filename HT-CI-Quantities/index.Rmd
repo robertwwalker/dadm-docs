@@ -25,11 +25,13 @@ thematic::thematic_rmd()
 
 ```{r cars, fig.cap ="Scatterplot of cars data"}
 library(tidyverse)
-ggplot(cars) + 
+GGP1 <- ggplot(cars) + 
   aes(x=speed, y=dist) +
   geom_point() + 
   theme_minimal() +
   labs(x="Speed", y="Stopping Distance")
+library(plotly)
+ggplotly(GGP1)
 ```
 
 *** 
@@ -47,7 +49,7 @@ We require two things:
 
 ### Hypothesis Testing and $t$
 
-I will work with the speed variable.  Let me consider two distinct hypotheses though this is not entirely proper in the sense that any given application of hypothesis testing should have a clear hypothesis about the variable of interest rather than waffling amongst two as I will.  I do so only for illustrative purposes.  To begin, I need to specify both the hypothesis and the confidence level that I intend to use to evaluate it.  
+I will work with the speed variable.  On a basic level, a hypothesis is a specific value for the average here.  For whatever reason, $\mu=17$ motivates us.  I consider all three distinct hypotheses though this is not entirely proper in the sense that any given application of hypothesis testing should have a clear hypothesis about the variable of interest rather than waffling amongst all of them as I will.  I do so only for illustrative purposes.  To begin, I need to specify both the hypothesis and the confidence level that I intend to use to evaluate it.  
 
 - **Case 1**: The hypothesis to advance is that 17 is the true average speed.  The alternative must then be that the average speed is not 17; it could be smaller or larger than 17. I wish to evaluate this claim with 90% confidence.  
 - **Case 2**: The hypothesis to advance is that 17 or greater is the true average speed.  The alternative must then be that the average speed is less than 17.  I wish to evaluate this claim with 90% confidence.  
@@ -67,11 +69,34 @@ This fully defines the parts we require and the core problem
 ### Details of the Data {data-commentary-width=600}
 
 ```{r, message=FALSE, warning=FALSE}
+library(ResampleProps)
+library(gt)
+Resampled.Means <- data.frame(Mean.Speed = ResampleMean(cars$speed, k=10000))
 library(tidyverse)
-cars %>% summarise(Mean = mean(speed),
-                   SD = sd(speed),
-                   SE = sd(speed)/sqrt(n()),
-                   N = n())
+Tab.Res <- cars %>% summarise(Mean = mean(speed),
+                   SD = round(sd(speed), digits=3),
+                   SE = round(sd(speed)/sqrt(n()), digits=3),
+                   N = n(),
+                   P05 = round(quantile(Resampled.Means$Mean.Speed, probs=0.05), digits=3),
+P95 = round(quantile(Resampled.Means$Mean.Speed, probs=0.95), digits=3),
+P10 = round(quantile(Resampled.Means$Mean.Speed, probs=0.1), digits=3),
+P90 = round(quantile(Resampled.Means$Mean.Speed, probs=0.9), digits=3)
+)
+Table.Res <- Tab.Res %>% gt() %>%  
+  tab_spanner(
+    label = "Percentile of Simulated Means",
+    columns = c(P05,P95,P10,P90))
+Q05 <- quantile(Resampled.Means$Mean.Speed, probs=0.05)
+Q95 <- quantile(Resampled.Means$Mean.Speed, probs=0.95)
+Q1 <- quantile(Resampled.Means$Mean.Speed, probs=0.1)
+Q9 <- quantile(Resampled.Means$Mean.Speed, probs=0.9)
+Resampled.Means %>% ggplot() + 
+  aes(x=Mean.Speed) + 
+  geom_density() + 
+  geom_vline(aes(xintercept=Q05), color="red") +
+  geom_vline(aes(xintercept=Q95), color="red") +
+  theme_minimal() + 
+  labs(x="Resampled Average", title="Resampled Means", subtitle="Middle 90% in red")
 ```
 
 ***
@@ -82,6 +107,14 @@ cars %>% summarise(Mean = mean(speed),
 - The standard error of the mean is 0.7478.
 
 $$t = \frac{15.4 - 17}{\frac{s}{\sqrt{n}}} = \frac{-1.6}{0.7478}=-2.14$$
+
+*There are 2.14 standard errors between the mean that we obtain from the data and the hypothetical mean of 17; the value from the data is smaller, hence the negative.*
+
+The <span style="color: red;">middle 90% of the simulated means</span> range from `r round(Q05, digits=3)` to `r round(Q95, digits=3)`.
+
+```{r}
+Table.Res
+```
 
 ### Case 1: A Two-sided Alternative {data-commentary-width=400}
 
@@ -121,7 +154,7 @@ Critical Values
 P(-1.677 < X < 1.677)     = 0.9
 1 - P(-1.677 < X < 1.677) = 0.1
 
-Result
+Result: The p-value
 P(X < -2.14) = 0.019
 P(X > 2.14) = 0.019
 P(-2.14 < X < 2.14)     = 0.963
@@ -169,7 +202,7 @@ Critical Values
 P(X < -1.299) = 0.1
 P(X > -1.299) = 0.9
 
-Result
+Result: The p-value
 P(X < -2.14) = 0.019
 P(X > -2.14) = 0.981
 ```
@@ -214,7 +247,7 @@ Critical Values
 P(X < -1.299) = 0.1
 P(X > -1.299) = 0.9
 
-Result
+Result: The p-value
 P(X < -2.14) = 0.019
 P(X > -2.14) = 0.981
 ```
@@ -232,7 +265,7 @@ Knowing only the sample size, 50, is sufficient to determine what $t$ must be to
 **Alternative: Two-sided**
 
 ```{r}
-t.test(cars$speed, mu=17)
+t.test(cars$speed, mu=17, conf.level = 0.9)
 ```
 
 ***
@@ -240,12 +273,99 @@ t.test(cars$speed, mu=17)
 **Alternative: Less**
 
 ```{r}
-t.test(cars$speed, mu=17, alternative="less")
+t.test(cars$speed, mu=17, alternative="less", conf.level = 0.9)
 ```
 
 **Alternative: Greater**
 
 ```{r}
-t.test(cars$speed, mu=17, alternative = "greater")
+t.test(cars$speed, mu=17, alternative = "greater", conf.level = 0.9)
 ```
+
+
+### `radiant` {data-commentary-width=600}
+
+**Alternative: Two-sided**
+
+```{r}
+result <- single_mean(
+  cars, 
+  var = "speed", 
+  comp_value = 17, 
+  conf_lev = 0.9
+)
+summary(result)
+# plot(result, plots = "hist", custom = FALSE)
+```
+
+***
+
+**Alternative: Less**
+
+```{r}
+result <- single_mean(
+  cars, 
+  var = "speed", 
+  comp_value = 17, 
+  alternative = "less", 
+  conf_lev = 0.9
+)
+summary(result)
+# plot(result, plots = "hist", custom = FALSE)
+```
+
+**Alternative: Greater**
+
+```{r}
+result <- single_mean(
+  cars, 
+  var = "speed", 
+  comp_value = 17, 
+  alternative = "greater", 
+  conf_lev = 0.9
+)
+summary(result)
+# plot(result, plots = "hist", custom = FALSE)
+
+```
+
+### The Confidence Interval: Analytics {data-commentary-width=400}
+
+```{r}
+data.frame(Avg.Speed = rt(10000, df=49)*0.7478 + 15.4) %>%
+  ggplot() + 
+  aes(x=Avg.Speed) +
+  geom_density() +
+  theme_minimal() +
+  labs(title = "The Confidence Interval")
+```
+
+***
+
+```{r}
+Table.Res
+```
+
+
+$$\mu = \overline{x} + t_{49}*\left(\frac{s}{\sqrt{n}}\right)$$
+
+Analytically, if 90% of $t$ is between `r round(qt(0.05, 49), 3)` and 
+`r round(qt(0.95, 49), 3)`, then the central 90% of the distribution of averages given the data should range from 
+
+$$\mu = 15.4 - (-1.677,1.677)*\left(\frac{5.288}{\sqrt{50}}\right)$$
+which simplifies to: 14.15 to 16.65.
+
+**In the resampled averages, this is `r Q05` to `r Q95`.**
+
+
+90% of the $t$ is bigger than -1.299, so $\mu$ should be greater than
+
+$$15.4 - 1.299*0.7478 = 14.43.$$
+**In the resampled averages, `r Q1` is the 10th percentile.**
+
+90% of $t$ is smaller than 1.299, so $\mu$ should be smaller than 
+
+$$15.4 + 1.299*0.7478 = 16.37.$$
+**In the resampled averages, the 90th percentile is `r Q9`.**
+
 
