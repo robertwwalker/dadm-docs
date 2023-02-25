@@ -1,12 +1,14 @@
 ---
-title: "Hypothesis Testing and Confidence Intervals"
+title: "Hypothesis Testing and Confidence Intervals for Quantities"
+author: "Robert W. Walker"
 output: 
   flexdashboard::flex_dashboard:
+    logo: https://github.com/robertwwalker/DADMStuff/raw/master/logo.png
     storyboard: true
     theme:
       bg: "#FFFFFF"
       fg: "#000000" 
-      primary: "#099587"
+      primary: "#AF98E6"
       base_font:
         google: Prompt
       code_font:
@@ -16,6 +18,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
+knitr::opts_chunk$set(message=FALSE, warning = FALSE, echo=FALSE)
 library(flexdashboard)
 library(thematic)
 thematic::thematic_rmd()
@@ -41,9 +44,9 @@ I will work with R's internal dataset on cars: `cars`.  There are two variables 
 We require two things:
 
 1. A **claim** based on **target/hypothesized value**
-   + Alternative two-sided: $\mu = target$ vs. $\mu \neq target$
-   + Alternative greater: $\mu \leq target$ vs. $\mu > target$
-   + Alternative lesser: $\mu \geq target$ vs. $\mu < target$
+   + Null equal and alternative two-sided [not equal]: $\mu = target$ vs. $\mu \neq target$
+   + Null less than or equal and alternative greater: $\mu \leq target$ vs. $\mu > target$
+   + Null greater than or equal and alternative lesser: $\mu \geq target$ vs. $\mu < target$
 
 2. A **confidence level** that is a threshold in probability for rendering a true/false answer.
 
@@ -55,22 +58,24 @@ I will work with the speed variable.  On a basic level, a hypothesis is a specif
 - **Case 2**: The hypothesis to advance is that 17 or greater is the true average speed.  The alternative must then be that the average speed is less than 17.  I wish to evaluate this claim with 90% confidence.  
 - **Case 1**: The hypothesis to advance is that 17 or less is the true average speed.  The alternative must then be that the average speed is greater than 17.  I wish to evaluate this claim with 90% confidence.  
 
+**Before getting to equations, something is important to note.  The mean of the data, $\overline{x}$, $s$, the standard deviation, and $n$ are all known from the data.  There are then only two remaining unknowns, either $t$ or $\mu$.**
 
 The $t$ equation is given by:
 
 $$t=\frac{\overline{x} - \mu}{\frac{s}{\sqrt{n}}}$$
 
-One further algebraic manipulation before starting.  Let's solve for $\overline{x}$.
+One further algebraic manipulation before starting.  Let's solve for $\mu$.
 
-$$\mu + t\left(\frac{s}{\sqrt{n}}\right)=\overline{x}$$
+$$\mu = \overline{x} - t\left(\frac{s}{\sqrt{n}}\right)$$
 
-This fully defines the parts we require and the core problem
+This fully defines the parts we require and the core problem because the data essentially gives us almost all of the unknowns.  In some very basic way, conditional on data, only $\mu$ or $t$ from a given probability remain unknown.
 
 ### Details of the Data {data-commentary-width=600}
 
 ```{r, message=FALSE, warning=FALSE}
 library(ResampleProps)
 library(gt)
+library(gtExtras)
 Resampled.Means <- data.frame(Mean.Speed = ResampleMean(cars$speed, k=10000))
 library(tidyverse)
 Tab.Res <- cars %>% summarise(Mean = mean(speed),
@@ -85,7 +90,9 @@ P90 = round(quantile(Resampled.Means$Mean.Speed, probs=0.9), digits=3)
 Table.Res <- Tab.Res %>% gt() %>%  
   tab_spanner(
     label = "Percentile of Simulated Means",
-    columns = c(P05,P95,P10,P90))
+    columns = c(P05,P95,P10,P90)) %>%
+  gt_theme_nytimes() %>% 
+  tab_header(title = "Speed from cars: The Distribution of the Average")
 Q05 <- quantile(Resampled.Means$Mean.Speed, probs=0.05)
 Q95 <- quantile(Resampled.Means$Mean.Speed, probs=0.95)
 Q1 <- quantile(Resampled.Means$Mean.Speed, probs=0.1)
@@ -102,9 +109,9 @@ Resampled.Means %>% ggplot() +
 ***
 
 - The mean of speed is 15.4 mph
-- The standard deviation is 5.288 mph.
+- The standard deviation (SD) is 5.288 mph.
 - There are fifty observations. [n=50]
-- The standard error of the mean is 0.7478.
+- The standard error of the mean (SE) is 0.7478.
 
 $$t = \frac{15.4 - 17}{\frac{s}{\sqrt{n}}} = \frac{-1.6}{0.7478}=-2.14$$
 
@@ -168,7 +175,7 @@ Knowing only the sample size, 50, is sufficient to determine what $t$ must be to
 
 - **Critical Values:** The sample mean would have to be at least **$\pm$ `r abs(round(qt(0.05, 49), digits=3))` ** standard errors away from 17 to rule out a mean of 17 with 90% confidence.
 
-- **Result:** Our sample mean is **2.14** standard errors away from 17.  The probability of something equally or **more extreme** is **0.037**.
+- **Result:** Our sample mean is **2.14** standard errors away from 17.  The probability of something equally or **more extreme** is **0.037**.  *This is known as the p-value.*
 
 
 ### Case 2: A Lesser Alternative {data-commentary-width=400}
@@ -213,7 +220,7 @@ Knowing only the sample size, 50, is sufficient to determine what $t$ must be to
 
 - **Critical Values:** The sample mean would have to be at most **`r round(qt(0.1, 49), digits=3)` ** standard errors away from 17 to rule out a mean of 17 or greater with 90% confidence.
 
-- **Result:** Our sample mean is **-2.14** standard errors away from 17.  The probability of something equal or **lesser** is **`r round(pt(-2.14, 49), digits=3)`**.
+- **Result:** Our sample mean is **-2.14** standard errors away from 17.  The probability of something equal or **lesser** is **`r round(pt(-2.14, 49), digits=3)`**.   *This is known as the p-value.*
 
 
 ### Case 3: A Greater Alternative {data-commentary-width=400}
@@ -258,7 +265,7 @@ Knowing only the sample size, 50, is sufficient to determine what $t$ must be to
 
 - **Critical Values:** The sample mean would have to be at most **`r round(qt(0.1, 49), digits=3)` ** standard errors away from 17 to rule out a mean of 17 or greater with 90% confidence.
 
-- **Result:** Our sample mean is **-2.14** standard errors away from 17.  The probability of something equal or **greater** is **`r round(1-pt(-2.14, 49), digits=3)`**.
+- **Result:** Our sample mean is **-2.14** standard errors away from 17.  The probability of something equal or **greater** is **`r round(1-pt(-2.14, 49), digits=3)`**.   *This is known as the p-value.*
 
 ### `t.test` {data-commentary-width=600}
 
